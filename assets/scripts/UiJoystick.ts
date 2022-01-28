@@ -41,7 +41,6 @@ export class UIJoystick extends Component {
 
 			this.tempV2.set(this.tempV3.x, this.tempV3.y);
 			const angle = this.tempV2.angle(HORIZONTAL) * Math.sign(this.tempV2.y);
-			console.log(Math.cos(angle), Math.sin(angle));
 
 			this.stick.setPosition(this.tempV3);
 			this.player.setRotationFromEuler(0,180*angle/Math.PI,0);
@@ -50,6 +49,11 @@ export class UIJoystick extends Component {
 			this.tempV3.x += (Math.cos(angle)*0.1);
 			this.tempV3.z -= (Math.sin(angle)*0.1);
 			this.player.setWorldPosition(this.tempV3);
+
+			this.camera.getWorldPosition(this.tempV3);
+			this.tempV3.x += (Math.cos(angle)*0.1);
+			this.tempV3.z -= (Math.sin(angle)*0.1);
+			this.camera.setWorldPosition(this.tempV3);
 		})
 
 		this.node.on(Node.EventType.TOUCH_CANCEL, () => {
