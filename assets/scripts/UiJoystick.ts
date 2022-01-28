@@ -4,8 +4,9 @@ import { Box } from './Box';
 const { ccclass, property } = _decorator;
 
 const HORIZONTAL = v2(1, 0);
-const SPEED = 0.1;
+const SPEED = 0.8;
 const RING_R = 80;
+const THRESHOLD = 40;
  
 @ccclass('UIJoystick')
 export class UIJoystick extends Component {
@@ -30,8 +31,17 @@ export class UIJoystick extends Component {
 	private angle = 0;
 	private collider: BoxCollider;
 	private infoLabel: Label;
+	private boxPrefab: Prefab;
+	private currentTint: number[] = [];
 
 	onLoad() {
+		resources.load("prefabs/box", Prefab, (err, prefab) => {
+			if (err) {
+				console.log('= = => UIJoystick.onLoad Error:', err);
+			} else {
+				this.boxPrefab = prefab;
+			}
+		});
 		this.stick = this.node.getChildByName("stick");
 		this.player = this.node.parent.parent.getChildByName("haigui");
 		this.camera = this.node.parent.parent.getChildByName("Main Camera");
@@ -45,11 +55,32 @@ export class UIJoystick extends Component {
 		this.collider = this.player.getComponent(BoxCollider);
 		this.collider.on('onTriggerEnter', ({otherCollider}: ICollisionEvent) => {
 			const tint = otherCollider.getComponent(Box).tint;
-			console.log('Tint:', tint);
+			if (this.checkTint(tint)) {
+				alert("You found two opposite colors! 🎉");
+			}
+			this.currentTint = tint;
 			this.infoLabel.string = `${tint}`;
 			this.infoLabel.color.set(...tint);
 			otherCollider.node.destroy();
+
+			const newBox = instantiate(this.boxPrefab);
+			newBox.setPosition(this.randomX(),2,this.randomX());
+			this.node.parent.parent.addChild(newBox);
 		});
+	}
+
+	private checkTint(tint: number[]) {
+		if (this.currentTint.length !== 0) {
+			const a = Math.abs(tint[0] - this.currentTint[0]);
+			const b = Math.abs(tint[1] - this.currentTint[1]);
+			const c = Math.abs(tint[2] - this.currentTint[2]);
+
+			// console.log(a,b,c,THRESHOLD);
+
+			if (a<THRESHOLD && b<THRESHOLD && c<THRESHOLD) {
+				return true;
+			}
+		}
 	}
 
 	private onTouchStart = () => this.isMoving = true
@@ -72,6 +103,8 @@ export class UIJoystick extends Component {
 		this.stick.setPosition(v3(0, 0, 0));
 			this.isMoving = false;
 	}
+
+	private randomX = () => Math.floor(Math.random()*100) - 50
 
 	update(dt: number) {
 		if (this.isMoving) {
