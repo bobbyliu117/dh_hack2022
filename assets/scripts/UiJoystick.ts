@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, instantiate, resources, Prefab, EventTouch, v2, v3, Vec2, Vec3, UITransformComponent } from 'cc';
+import { _decorator, Component, Node, instantiate, resources, Prefab, EventTouch, v2, v3, Vec2, Vec3, UITransformComponent, BoxCollider, Collider } from 'cc';
 const { ccclass, property } = _decorator;
 
 const HORIZONTAL = v2(1, 0);
@@ -27,6 +27,7 @@ export class UIJoystick extends Component {
 	private updateV3 = v3();
 	private isMoving = false;
 	private angle = 0;
+	private collider: any;
 
 	onLoad() {
 		this.stick = this.node.getChildByName("stick");
@@ -37,6 +38,12 @@ export class UIJoystick extends Component {
 		this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove);
 		this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd);
 		this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd);
+
+		this.collider = this.player.getComponent(Collider);
+		console.log('Collider:',this.collider);
+		this.collider.on('onTriggerEnter', (x) => {
+			console.log('Colliding', x);
+		});
 	}
 
 	private onTouchStart = () => this.isMoving = true
