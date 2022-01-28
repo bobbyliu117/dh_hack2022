@@ -4,7 +4,7 @@ import { Box } from './Box';
 const { ccclass, property } = _decorator;
 
 const HORIZONTAL = v2(1, 0);
-const SPEED = 0.8;
+const SPEED = 0.2;
 const RING_R = 80;
 const THRESHOLD = 40;
  
