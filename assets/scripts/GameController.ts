@@ -7,5 +7,7 @@ const { ccclass, property } = _decorator;
 export class GameController extends Component {
   onLoad() {
 		UIJoystick.init(this.node.parent.getChildByName("Canvas"));
+
+		
 	}
 }

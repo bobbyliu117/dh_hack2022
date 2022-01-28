@@ -1,5 +1,6 @@
 
-import { _decorator, Component, Node, instantiate, resources, Prefab, EventTouch, v2, v3, Vec2, Vec3, UITransformComponent, BoxCollider, Collider } from 'cc';
+import { _decorator, Component, Node, instantiate, resources, Prefab, EventTouch, v2, v3, Vec2, Vec3, UITransformComponent, BoxCollider, Collider, ICollisionEvent, ParticleSystem, Label } from 'cc';
+import { Box } from './Box';
 const { ccclass, property } = _decorator;
 
 const HORIZONTAL = v2(1, 0);
@@ -27,22 +28,27 @@ export class UIJoystick extends Component {
 	private updateV3 = v3();
 	private isMoving = false;
 	private angle = 0;
-	private collider: any;
+	private collider: BoxCollider;
+	private infoLabel: Label;
 
 	onLoad() {
 		this.stick = this.node.getChildByName("stick");
 		this.player = this.node.parent.parent.getChildByName("haigui");
 		this.camera = this.node.parent.parent.getChildByName("Main Camera");
+		this.infoLabel = this.node.parent.getChildByName("info").getComponent(Label);
 
 		this.node.on(Node.EventType.TOUCH_START, this.onTouchStart);
 		this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove);
 		this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd);
 		this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd);
 
-		this.collider = this.player.getComponent(Collider);
-		console.log('Collider:',this.collider);
-		this.collider.on('onTriggerEnter', (x) => {
-			console.log('Colliding', x);
+		this.collider = this.player.getComponent(BoxCollider);
+		this.collider.on('onTriggerEnter', ({otherCollider}: ICollisionEvent) => {
+			const tint = otherCollider.getComponent(Box).tint;
+			console.log('Tint:', tint);
+			this.infoLabel.string = `${tint}`;
+			this.infoLabel.color.set(...tint);
+			otherCollider.node.destroy();
 		});
 	}
 
